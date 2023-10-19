@@ -1,0 +1,27 @@
+name: CI
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [ amd64, arm64 ]
+    steps:
+    - uses: actions/checkout@v3
+    - name: Run a multi-line script
+      run: |
+        echo this is ${{ matrix.arch }} > foo-${{ matrix.arch }}.txt
+    - run: mv foo-${{ matrix.arch }}.txt bar-${{ matrix.arch }}.dat
+
+    - name: Upload ${{ matrix.arch }} repo
+      uses: actions/upload-artifact@v3
+      with:
+        name: ostree-${{ matrix.arch }}-trixie-repo
+        path: bar-${{ matrix.arch }}.dat
+        retention-days: 2
